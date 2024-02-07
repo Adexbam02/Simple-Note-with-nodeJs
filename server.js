@@ -1,5 +1,5 @@
 const express = require("express")
-const  connect  = require("./connectDB")
+const connect = require("./connectDB")
 const app = express()
 // const { connect } = require("mongoose");
 const mongoose = require("mongoose");
@@ -8,10 +8,6 @@ const Note = require("./noteSchema")
 const PORT = 3800
 
 app.use(express.json())
-
-app.get("/", (req, res) => {
-    res.send("Gkj")
-})
 
 app.post("/api/new-post", (req, res, next) => {
     try {
@@ -41,7 +37,7 @@ app.get("/api/posts", async (req, res) => {
     try {
         const posts = await Note.find().sort({ updatedAt: -1 });
 
-        if(!posts){
+        if (!posts) {
             console.log("Error getting posts")
             // console.log(`${res.status()}`)
         }
@@ -52,12 +48,54 @@ app.get("/api/posts", async (req, res) => {
     }
 })
 
-app.get("/api/post/:id", (req, res) => {
+app.get("/api/post/:id", async (req, res) => {
+    try {
+        const note = req.params.id
 
+        const getNote = await Note.findById(note)
+
+        if (!getNote) {
+            console.log("error occur while getting the note")
+        }
+        res.status(200).json(getNote)
+    } catch (error) {
+        res.status(500).json({ error: "An error occur while fetching the note" })
+    }
 })
 
-app.delete("/api/post/:id", (req, res) => {
+app.patch("/api/post/:id", async (req, res) => {
+    try {
+        // const note = req.params.id
+        let { title, author, body } = req.body
 
+        const updateNote = await Note.findByIdAndUpdate({
+            title,
+            author,
+            body
+        })
+
+        if (!updateNote) {
+            console.log("error occur while updating the note")
+        }
+        res.status(200).json(updateNote)
+    } catch (error) {
+        res.status(500).json({ error: "An error occur while updating the note" })
+    }
+})
+
+app.delete("/api/post/:id", async(req, res) => {
+    try {
+        const note = req.params.id
+
+        const deleteNote = await Note.findByIdAndDelete(note)
+
+        if (!deleteNote) {
+            console.log("error occur while deleting the note")
+        }
+        res.status(200).json(deleteNote)
+    } catch (error) {
+        res.status(500).json({ error: "An error occur while deleting the note" })
+    }
 })
 
 
